@@ -75,16 +75,8 @@ class Tracker:
         M, N = bboxes1.shape[0], bboxes2.shape[0]
         cost_matrix = self.cost_matrix(bboxes1, bboxes2)
         assign_matrix = torch.zeros((M, N))
-        temp_cost = cost_matrix.detach()
-        if N < M:
-            temp_cost = torch.transpose(temp_cost, 0, 1)
-            assign_matrix = torch.transpose(assign_matrix, 0, 1)
-        for i in range(min(M, N)):
-            j = torch.argmin(cost_matrix[i])
-            assign_matrix[i, j] = 1
-            cost_matrix[:, j] = 100 #high invalid value
-        if N < M:
-            assign_matrix = torch.transpose(assign_matrix, 0, 1)
+        row_ids, col_ids = greedy_matching(cost_matrix.numpy())
+        assign_matrix[row_ids, col_ids] = 1
         return assign_matrix, cost_matrix
 
 
@@ -105,9 +97,8 @@ class Tracker:
         M, N = bboxes1.shape[0], bboxes2.shape[0]
         cost_matrix = self.cost_matrix(bboxes1, bboxes2)
         assign_matrix = torch.zeros((M, N))
-        row_ind, col_ind = scipy.optimize.linear_sum_assignment(cost_matrix.numpy())
-        for i in range(len(row_ind)):
-            assign_matrix[row_ind, col_ind] = 1
+        row_ids, col_ids = hungarian_matching(cost_matrix.numpy())
+        assign_matrix[row_ids, col_ids] = 1
         return assign_matrix, cost_matrix
 
     def track_consecutive_frame(

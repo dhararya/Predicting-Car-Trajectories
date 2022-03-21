@@ -18,6 +18,16 @@ def greedy_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
     """
     # TODO: Replace this stub code.
     row_ids = [], col_ids = []
+    M = cost_matrix.shape[0]
+    N = cost_matrix.shape[1]
+    if N < M:
+        temp_cost = torch.transpose(temp_cost, 0, 1)
+        assign_matrix = torch.transpose(assign_matrix, 0, 1)
+    for i in range(min(M, N)):
+        row_ids.append(i)
+        col_ids.append(j)
+    if N < M:
+        row_ids, col_ids = col_ids, row_ids
     return row_ids, col_ids
 
 
@@ -39,4 +49,5 @@ def hungarian_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
     """
     # TODO: Replace this stub code.
     row_ids = [], col_ids = []
+    row_ids, cold_ids = scipy.optimize.linear_sum_assignment(cost_matrix)
     return row_ids, col_ids
