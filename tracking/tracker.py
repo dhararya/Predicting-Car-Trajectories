@@ -56,9 +56,8 @@ class Tracker:
             cost_matrix: cost matrix of shape [M, N]
         """
         # TODO: Replace this stub code by making use of iou_2d
-        M, N = bboxes1.shape[0], bboxes2.shape[0]
-        cost_matrix = torch.ones((M, N))
-        return cost_matrix
+        cost_matrix = iou_2d(bboxes1, bboxes2)
+        return 1-cost_matrix
 
     def associate_greedy(
         self, bboxes1: Tensor, bboxes2: Tensor
