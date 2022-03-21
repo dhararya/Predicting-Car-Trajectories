@@ -107,7 +107,7 @@ class Tracker:
         assign_matrix = torch.zeros((M, N))
         row_ind, col_ind = scipy.optimize.linear_sum_assignment(cost_matrix.numpy())
         for i in range(len(row_ind)):
-            assign_matrix[row_ind, col_ind] = 1 
+            assign_matrix[row_ind, col_ind] = 1
         return assign_matrix, cost_matrix
 
     def track_consecutive_frame(
