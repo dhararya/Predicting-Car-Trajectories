@@ -1,5 +1,5 @@
 import numpy as np
-from Shapely.geometry import Polygon
+from shapely.geometry import Polygon
 
 def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
     cos_yaw = math.cos(boxes[:, 4])
