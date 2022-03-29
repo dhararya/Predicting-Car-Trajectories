@@ -126,7 +126,8 @@ class Tracker:
             raise ValueError(f"Unknown association method {self.associate_method}")
 
         # TODO: Filter out matches with costs >= self.match_th
-
+        mask = cost_matrix >= self.match_th
+        assign_matrix[mask] = 0
         return assign_matrix, cost_matrix
 
     def track(self, bboxes_seq: List[Tensor], scores_seq: List[Tensor]):
