@@ -31,7 +31,7 @@ class PredictionModel(nn.Module):
 
         self._encoder = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(20, 64),
+            nn.Linear(30, 64),
             nn.ReLU(),
             nn.Linear(64, 128),
             nn.ReLU(),
