@@ -27,7 +27,7 @@ def greedy_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
     for i in range(min(M, N)):
         row_ids.append(i)
         col_ids.append(np.argmin(cost_matrix[i]))
-        cost[col_ids[i]] = 999
+        cost[:, col_ids[i]] = 999
     if N < M:
         row_ids, col_ids = col_ids, row_ids
     return row_ids, col_ids
