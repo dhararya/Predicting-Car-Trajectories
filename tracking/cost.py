@@ -9,6 +9,7 @@ def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
     coord_1x = boxes[:, 0] + boxes[:, 2] / 2
     coord_1y = boxes[:, 1] + boxes[:, 3] / 2
     coord_1 = np.stack([cos_yaw * coord_1x - sin_yaw * coord_1y, sin_yaw * coord_1x + cos_yaw * coord_1y], axis=1)
+    print(coord_1)
 
     # second coordinate
     coord_2x = boxes[:, 0] + boxes[:, 2] / 2
@@ -48,8 +49,9 @@ def iou_2d(bboxes1: np.ndarray, bboxes2: np.ndarray) -> np.ndarray:
             if len(n_polygons) < n+1:
                 n_polygons.append(Polygon(n_boxes[n]))
             n_polygon = n_polygons[n]
-            print(m_boxes[m])
-            print(n_boxes[n])
-            print(m_polygon.intersection(n_polygon).area)
+            if m==1 and n==1:
+                print(m_boxes[m])
+                print(n_boxes[n])
+                print(m_polygon.intersection(n_polygon).area)
             iou_mat[m][n] = m_polygon.intersection(n_polygon).area / m_polygon.union(n_polygon).area
     return iou_mat
