@@ -4,6 +4,9 @@ from tracking.cost import iou_2d
 
 
 def test_iou_2d() -> None:
+    # test 1
+    bboxes_a = np.array([[0.0, 0.0, 2.0, 1.0, 0.0], [0.0, 0.0, 2.0, 1.0, np.pi / 2]])
+    bboxes_b = np.array([[1.0, 0.0, 2.0, 1.0, 0.0], [1.0, 0.0, 2.0, 1.0, np.pi / 2]])
 
 
     # test 2
