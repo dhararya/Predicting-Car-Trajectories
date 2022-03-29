@@ -55,4 +55,6 @@ def test_diff_solution(helpers):
     assert np.linalg.matrix_rank(hungarian_matrix) == 3
     assert np.sum(greedy_matrix) == 3
     assert np.sum(hungarian_matrix) == 3
+    print(greedy_matrix)
+    print(hungarian_matrix)
     assert not np.isclose(greedy_cost, hungarian_cost)

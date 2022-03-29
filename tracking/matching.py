@@ -49,7 +49,5 @@ def hungarian_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
         assignment corresponds to costs[0, 3], costs[1, 1] and costs[2, 0].
     """
     # TODO: Replace this stub code.
-    row_ids = []
-    col_ids = []
     row_ids, col_ids = linear_sum_assignment(cost_matrix)
     return row_ids, col_ids
