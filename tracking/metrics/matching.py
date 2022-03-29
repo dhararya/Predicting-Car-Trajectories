@@ -181,8 +181,8 @@ class Matching:
     def compute_mota(self) -> float:
         """Multiple object tracking accuracy"""
         # TODO: Replace this stub code.
-        num = np.sum(num_misses_list)+sum(self.num_false_positives_list)+sum(self.num_mismatches_list)
-        den = sum(num_misses_list)+sum(num_matches_list)
+        num = np.sum(self.num_misses_list)+sum(self.num_false_positives_list)+sum(self.num_mismatches_list)
+        den = sum(self.num_misses_list)+sum(self.num_matches_list)
         return 1-num/den
 
     def compute_gt_coverage_percentage(
