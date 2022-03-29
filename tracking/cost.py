@@ -8,6 +8,8 @@ def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
     # first coordinate
     coord_1x = boxes[:, 0] + boxes[:, 2] / 2
     coord_1y = boxes[:, 1] + boxes[:, 3] / 2
+    print(coord_1x)
+    print(coord_1y)
     coord_1 = np.stack([cos_yaw * coord_1x - sin_yaw * coord_1y, sin_yaw * coord_1x + cos_yaw * coord_1y], axis=1)
     print(coord_1)
 
