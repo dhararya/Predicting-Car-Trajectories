@@ -17,7 +17,8 @@ def greedy_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
         assignment corresponds to costs[0, 3], costs[1, 1] and costs[2, 0].
     """
     # TODO: Replace this stub code.
-    row_ids = [], col_ids = []
+    row_ids = []
+    col_ids = []
     M = cost_matrix.shape[0]
     N = cost_matrix.shape[1]
     if N < M:
