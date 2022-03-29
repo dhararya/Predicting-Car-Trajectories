@@ -48,5 +48,8 @@ def iou_2d(bboxes1: np.ndarray, bboxes2: np.ndarray) -> np.ndarray:
             if len(n_polygons) < n+1:
                 n_polygons.append(Polygon(n_boxes[n]))
             n_polygon = n_polygons[n]
+            print(m_boxes[m])
+            print(n_boxes[n])
+            print(m_polygon.intersection(n_polygon).area)
             iou_mat[m][n] = m_polygon.intersection(n_polygon).area / m_polygon.union(n_polygon).area
     return iou_mat
