@@ -176,6 +176,7 @@ class Matching:
     def compute_motp(self) -> float:
         """Multiple object tracking precision"""
         # TODO: Replace this stub code.
+        print(sum(self.matched_dists_list)/sum(self.num_matches_list))
         return sum(self.matched_dists_list)/sum(self.num_matches_list)
 
     def compute_mota(self) -> float:
