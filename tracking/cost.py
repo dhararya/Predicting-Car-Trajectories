@@ -2,8 +2,8 @@ import numpy as np
 from shapely.geometry import Polygon
 
 def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
-    cos_yaw = torch.cos(boxes[:, 4])
-    sin_yaw = torch.sin(boxes[:, 4])
+    cos_yaw = np.cos(boxes[:, 4])
+    sin_yaw = np.sin(boxes[:, 4])
 
     # first coordinate
     coord_1x = boxes[:, 0] + boxes[:, 2] / 2
