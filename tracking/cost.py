@@ -8,22 +8,22 @@ def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
     # first coordinate
     coord_1x = boxes[:, 0] + boxes[:, 2] / 2
     coord_1y = boxes[:, 1] + boxes[:, 3] / 2
-    coord_1 = np.stack([cos_yaw * coord_1x - sin_yaw * coord_1x, sin_yaw * coord_1y + sin_yaw * coord_1y], axis=1)
+    coord_1 = np.stack([cos_yaw * coord_1x - sin_yaw * coord_1y, sin_yaw * coord_1x + cos_yaw * coord_1y], axis=1)
 
     # second coordinate
     coord_2x = boxes[:, 0] + boxes[:, 2] / 2
     coord_2y = boxes[:, 1] - boxes[:, 3] / 2
-    coord_2 = np.stack([cos_yaw * coord_2x - sin_yaw * coord_2x, sin_yaw * coord_2y + sin_yaw * coord_2y], axis=1)
+    coord_2 = np.stack([cos_yaw * coord_2x - sin_yaw * coord_2y, sin_yaw * coord_2x + cos_yaw * coord_2y], axis=1)
 
     # third coordinate
     coord_3x = boxes[:, 0] - boxes[:, 2] / 2
     coord_3y = boxes[:, 1] - boxes[:, 3] / 2
-    coord_3 = np.stack([cos_yaw * coord_3x - sin_yaw * coord_3x, sin_yaw * coord_3y + sin_yaw * coord_3y], axis=1)
+    coord_3 = np.stack([cos_yaw * coord_3x - sin_yaw * coord_3y, sin_yaw * coord_3x + cos_yaw * coord_3y], axis=1)
 
     # fourth coordinate
     coord_4x = boxes[:, 0] - boxes[:, 2] / 2
     coord_4y = boxes[:, 1] + boxes[:, 3] / 2
-    coord_4 = np.stack([cos_yaw * coord_4x - sin_yaw * coord_4x, sin_yaw * coord_4y + sin_yaw * coord_4y], axis=1)
+    coord_4 = np.stack([cos_yaw * coord_4x - sin_yaw * coord_4y, sin_yaw * coord_4x + cos_yaw * coord_4y], axis=1)
 
     return np.stack([coord_1, coord_2, coord_3, coord_4], axis=1)
 
@@ -41,9 +41,9 @@ def iou_2d(bboxes1: np.ndarray, bboxes2: np.ndarray) -> np.ndarray:
     iou_mat = np.zeros((M, N))
     m_boxes = _get_rotated_coordinates(bboxes1)
     n_boxes = _get_rotated_coordinates(bboxes2)
-    n_polygons  = []
+    n_polygons = []
     for m in range(M):
-        m_polygon =  Polygon(m_boxes[m])
+        m_polygon = Polygon(m_boxes[m])
         for n in range(N):
             if len(n_polygons) < n+1:
                 n_polygons.append(Polygon(n_boxes[n]))
