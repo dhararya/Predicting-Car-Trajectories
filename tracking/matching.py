@@ -26,7 +26,7 @@ def greedy_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
         assign_matrix = torch.transpose(assign_matrix, 0, 1)
     for i in range(min(M, N)):
         row_ids.append(i)
-        col_ids.append(j)
+        col_ids.append(i)
     if N < M:
         row_ids, col_ids = col_ids, row_ids
     return row_ids, col_ids
