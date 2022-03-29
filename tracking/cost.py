@@ -5,7 +5,7 @@ def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
     cos_yaw = np.cos(boxes[:, 4])
     sin_yaw = np.sin(boxes[:, 4])
     ox = boxes[:, 0]
-    ox = boxes[:, 1]
+    oy = boxes[:, 1]
 
     # first coordinate
     x = boxes[:, 0] + boxes[:, 2] / 2
