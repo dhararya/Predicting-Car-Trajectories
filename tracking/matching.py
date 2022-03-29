@@ -51,5 +51,5 @@ def hungarian_matching(cost_matrix: np.ndarray) -> Tuple[List, List]:
     # TODO: Replace this stub code.
     row_ids = []
     col_ids = []
-    row_ids, cold_ids = linear_sum_assignment.linear_sum_assignment(cost_matrix)
+    row_ids, cold_ids = linear_sum_assignment(cost_matrix)
     return row_ids, col_ids
