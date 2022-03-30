@@ -247,7 +247,7 @@ def train(
                     major = torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b))
                     minor = torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b))
                     boxes = torch.stack((major, minor), dim=2)
-                    predictions.boxes = boxes
+                    predictions.boxes = boxes/3
                     predictions.centroids = predictions.centroids[:, :, 0:2]
                 else:
                     predictions.boxes = labels[0].boxes
