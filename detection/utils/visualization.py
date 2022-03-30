@@ -5,9 +5,50 @@ import numpy as np
 import torch
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.patches import Arrow, Rectangle
+from matplotlib.patches import Arrow, Rectangle, Ellipse
 
 from detection.types import Detections
+
+
+def plot_ellipse(
+    ax: Axes,
+    x: float,
+    y: float,
+    yaw: float,
+    width: float,
+    height: float,
+    color: Any,
+    label: str,
+) -> None:
+
+    # Plot Ellipse
+    ax.add_patch(
+        Ellipse(
+            xy = (x,y),
+            width = width,
+            height =  height,
+            angle = yaw*180/(np.pi),
+            edgecolor = None,
+            facecolor = color,
+            alpha = 1,
+            label=label
+        )
+    )
+
+    # Plot orientation arrow
+    ax.add_patch(
+        Arrow(
+            x,
+            y,
+            np.cos(yaw) * width / 2,
+            np.sin(yaw) * height / 2,
+            edgecolor=color,
+            facecolor=color,
+            capstyle="projecting",
+            lw=1,
+        )
+    )
+
 
 
 def plot_box(
