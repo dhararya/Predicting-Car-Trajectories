@@ -41,11 +41,9 @@ def compute_NLL_loss(targets: Tensor, predictions: Tensor) -> Tensor:
     cov = predictions[:, :, 2:6].view(predictions.shape[0], predictions.shape[1], 2,2)
     log_det_cov = torch.log(torch.linalg.det(cov)) * torch.squeeze(mask[:, :, 0, 0])
     inv_cov =  torch.linalg.inv(cov) * torch.cat((mask, mask), 3)
-    print(torch.sum(torch.linalg.det(cov)<0))
-    print(torch.sum(0.5*torch.matmul(torch.matmul(torch.transpose(targets-means, 2,3), inv_cov), targets-means)))
-    loss = 0.5*log_det_cov+0.5*torch.matmul(torch.matmul(torch.transpose(targets-means, 2,3), inv_cov), targets-means)
-    print(torch.sum(loss))
-    return torch.sum(loss)
+    loss = 0.5*log_det_cov+0.5*torch.squeeze(torch.matmul(torch.matmul(torch.transpose(targets-means, 2,3), inv_cov), targets-means))
+    loss = torch.squeeze(torch.sum(loss, dim=1))
+    return torch.mean(loss)
 
 @dataclass
 class PredictionLossConfig:

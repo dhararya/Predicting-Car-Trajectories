@@ -8,7 +8,7 @@ def transform_using_actor_frame(
     """Transform a batch of positions either to or from actor frame
 
     Args:
-        positions (Tensor): [N x T x 2] (x, y)
+        positions (Tensor): [N x T x 4] (x, y)
         actor_pose (Tensor): [N x 3] (x, y, yaw)
 
     Returns:
@@ -64,8 +64,21 @@ def transform_using_actor_frame_gauss(
     Returns:
         Tensor: [N x T x 2] (x, y) in actor frame
     """
-    positions = output[:, :, 0:1]
-    cov = output[:, :, 2:6].reshape(position.shape[0], position.shape[1], 2,2)
+    positions = output[:, :, 0:2]
+    l = output[:, :, 2].reshape(-1)
+    d =output[:, :, 3:5].reshape(-1, 2)+0.001
+    lower_triangular = torch.zeros(output.shape[0]*output.shape[1], 2,2)
+    lower_triangular[:, 0, 0] =1
+    lower_triangular[:, 1, 1] =1
+    lower_triangular[:, 1, 0] =l
+    upper_traingular = torch.zeros(output.shape[0]*output.shape[1], 2,2)
+    upper_traingular[:, 0, 0] =1
+    upper_traingular[:, 1, 1] =1
+    upper_traingular[:, 0,1] = l
+    diag = torch.zeros(output.shape[0]*output.shape[1], 2,2)
+    diag[:, 0, 0] = d[:, 0]
+    diag[:, 1, 1] = d[:, 1]
+    cov = torch.matmul(torch.matmul(lower_triangular, diag), upper_traingular)
     num_timesteps = positions.shape[1]
 
     yaw = actor_frame[:, 2]
@@ -101,11 +114,11 @@ def transform_using_actor_frame_gauss(
         rotated_positions = rotated_positions.reshape(-1, num_timesteps, 2)  # N x T x 2
         transformed_positions = rotated_positions + actor_frame[:, None, :2]
     
-    rot_cov = torch.bmm(torch.bmm(expanded_rot_mat, cov), torch.transpose(expanded_rot_mat, 2,3)).reshape(position.shape[0], position.shape[1], 4)
+    cov = cov.view(-1, num_timesteps, 4)
 
-    result = np.zeros(position.shape[0], position.shape[1], 6)
+    result = torch.zeros(positions.shape[0], positions.shape[1], 6)
     result[:, :, 0:2] = transformed_positions.reshape(-1, num_timesteps, 2)
-    result[:, :, 2:6] = rot_cov
+    result[:, :, 2:6] = cov
 
     return result
 

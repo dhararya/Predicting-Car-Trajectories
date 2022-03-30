@@ -8,9 +8,8 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from detection.utils.visualization import plot_box
+from detection.utils.visualization import plot_box, plot_ellipse
 from prediction.types import Trajectories
-
 
 def visualize_trajectories(
     trajectories: Trajectories,
@@ -19,6 +18,7 @@ def visualize_trajectories(
     name: str,
     fig: Figure,
     ax: Axes,
+    gaussian: bool,
 ) -> Tuple[Figure, Axes]:
     """Plots a frame of detections and ground truth labels.
 
@@ -34,8 +34,8 @@ def visualize_trajectories(
     centroids_x = trajectories.centroids_x
     centroids_y = trajectories.centroids_y
     yaws = trajectories.yaws
-    boxes_x = trajectories.boxes_x
-    boxes_y = trajectories.boxes_y
+    boxes_x = trajectories.boxes_x if gaussian==False else trajectories.boxes[:, :, 0]
+    boxes_y = trajectories.boxes_y if gaussian==False else trajectories.boxes[:, :, 1]
 
     colors = []
     for ix in range(centroids_x.shape[0]):
@@ -47,16 +47,29 @@ def visualize_trajectories(
                 start_color[2] * (1 - ratio) + end_color[2] * ratio,
                 0.3,
             )
-            plot_box(
-                ax,
-                centroids_x[ix, t].item(),
-                centroids_y[ix, t].item(),
-                yaws[ix, t].item(),
-                boxes_x[ix, t].item(),
-                boxes_y[ix, t].item(),
-                new_color,
-                name,
-            )
+
+            if gaussian:
+                plot_ellipse(
+                    ax,
+                    centroids_x[ix, t].item(),
+                    centroids_y[ix, t].item(),
+                    yaws[ix, t].item(),
+                    boxes_x[ix, t].item(),
+                    boxes_y[ix, t].item(),
+                    new_color,
+                    name,
+                )
+            else:
+                plot_box(
+                    ax,
+                    centroids_x[ix, t].item(),
+                    centroids_y[ix, t].item(),
+                    yaws[ix, t].item(),
+                    boxes_x[ix, t].item(),
+                    boxes_y[ix, t].item(),
+                    new_color,
+                    name,
+                )
             colors.append(new_color)
 
     axins1 = inset_axes(ax, width="10%", height="4%", loc="upper left")
@@ -71,6 +84,7 @@ def visualize_trajectories(
 def vis_pred_labels(
     pred_trajectories: Trajectories,
     label_trajectories: Trajectories,
+    gauss: bool,
     figsize: Tuple[int, int] = (16, 16),
     dpi: int = 150,
 ):
@@ -88,6 +102,7 @@ def vis_pred_labels(
         "Predictions Time",
         fig,
         ax1,
+        gauss
     )
     visualize_trajectories(
         label_trajectories,
@@ -96,6 +111,7 @@ def vis_pred_labels(
         "Labels Time",
         fig,
         ax2,
+        False,
     )
 
     ax1.set_xlim(

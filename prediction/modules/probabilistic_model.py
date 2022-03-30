@@ -26,7 +26,7 @@ class ProbabilisticMLP(nn.Module):
                 nn.Flatten(),
                 nn.Linear(256, 128),
                 nn.ReLU(),
-                nn.Linear(128, 60),
+                nn.Linear(128, 50),
                 nn.ReLU(),
             )
 
@@ -57,7 +57,7 @@ class ProbabilisticModel(PredictionModel):
             List[Tensor]: List of length batch_size of output predicted trajectories in SDV frame [N x T x 2]
         """
         num_actors = len(batch_ids)
-        out = out.reshape(num_actors, -1, 6)  # [batch_size * N x T x 6]
+        out = out.reshape(num_actors, -1, 5)  # [batch_size * N x T x 6]
         # Transform from actor frame, to make the prediction problem easier
         transformed_out = transform_using_actor_frame_gauss(
             out, original_x_pose, translate_to=False
