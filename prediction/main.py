@@ -12,7 +12,8 @@ from tqdm import tqdm
 from prediction.dataset import PandasetPredDataset, custom_collate
 from prediction.metrics.evaluator import Evaluator
 from prediction.model import PredictionModel, PredictionModelConfig
-from prediction.modules.loss_function import PredictionLossFunction
+from prediction.modules.probabilistic_model import ProbabilisticModel
+from prediction.modules.loss_function import PredictionLossFunction, ProbabalisticPredictionLossFunction
 from prediction.utils.viz import vis_pred_labels
 
 torch.multiprocessing.set_sharing_strategy("file_system")
@@ -130,7 +131,8 @@ def train(
 
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config)
+    #model = PredictionModel(model_config)
+    model = ProbabilisticModel(model_config)
     if checkpoint_path is not None:
         model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
     model = model.to(device)
@@ -152,7 +154,8 @@ def train(
     )
 
     # setup loss function and optimizer
-    loss_fn = PredictionLossFunction(model_config.loss)
+    #loss_fn = PredictionLossFunction(model_config.loss)
+    loss_fn = ProbabalisticPredictionLossFunction(model_config.loss)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate * batch_size)
     # Learning rate decay coefficient
     # Set to < 1 if you want to decay the learning rate each epoch

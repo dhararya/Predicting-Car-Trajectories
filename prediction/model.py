@@ -41,7 +41,7 @@ class PredictionModel(nn.Module):
             nn.Flatten(),
             nn.Linear(128, 32),
             nn.ReLU(),
-            nn.Linear(32, 2),
+            nn.Linear(32, 20),
             nn.ReLU(),
         )
 
