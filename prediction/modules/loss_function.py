@@ -33,14 +33,19 @@ def compute_NLL_loss(targets: Tensor, predictions: Tensor) -> Tensor:
     Returns:
         A scalar NLL loss between `predictions` and `targets`
     """
-    means = predictions[:, :, 0:2]
-    cov = predictions[:, :, 2:6].view(predictions.shape[0], 2,2)
-    #ensures matrices are positive semidefinite
-    cov  = torch.matmul(cov, torch.transpose(cov, 2, 3))
-    log_det_cov = torch.log(torch.linalg.det(cov))
-    inv_cov =  torch.linalg.inv(cov)
-    loss = 0.5*log_det_cov+0.5*torch.matmul(torch.matmul(targets-means, inv_cov), torch.transpose(targets-means, 1,2))
-    return -torch.sum(loss)
+    means = predictions[:, :, 0:2].view(predictions.shape[0], predictions.shape[1], 2, 1)
+    targets =  targets.view(predictions.shape[0], predictions.shape[1], 2, 1)
+    mask = 1-targets.isnan().long()
+    targets = targets.nan_to_num(0)
+    means = means * mask
+    cov = predictions[:, :, 2:6].view(predictions.shape[0], predictions.shape[1], 2,2)
+    log_det_cov = torch.log(torch.linalg.det(cov)) * torch.squeeze(mask[:, :, 0, 0])
+    inv_cov =  torch.linalg.inv(cov) * torch.cat((mask, mask), 3)
+    print(torch.sum(torch.linalg.det(cov)<0))
+    print(torch.sum(0.5*torch.matmul(torch.matmul(torch.transpose(targets-means, 2,3), inv_cov), targets-means)))
+    loss = 0.5*log_det_cov+0.5*torch.matmul(torch.matmul(torch.transpose(targets-means, 2,3), inv_cov), targets-means)
+    print(torch.sum(loss))
+    return torch.sum(loss)
 
 @dataclass
 class PredictionLossConfig:
@@ -107,6 +112,7 @@ class ProbabalisticPredictionLossFunction(PredictionLossFunction):
 
     def __init__(self, config: PredictionLossConfig) -> None:
         super(PredictionLossFunction, self).__init__()
+        self._loss_weight = config.l1_loss_weight
 
     def forward(
         self, predictions: List[Tensor], targets: List[Tensor]
@@ -135,7 +141,7 @@ class ProbabalisticPredictionLossFunction(PredictionLossFunction):
         nll_loss = compute_NLL_loss(target_centroids, predicted_centroids)
 
         # 4. Aggregate losses using the configured weights.
-        total_loss = nll_loss * self._l1_loss_weight
+        total_loss = nll_loss * self._loss_weight
 
         loss_metadata = PredictionLossMetadata(total_loss, nll_loss)
         return total_loss, loss_metadata

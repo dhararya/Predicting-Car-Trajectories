@@ -34,7 +34,7 @@ class ProbabilisticMLP(nn.Module):
 class ProbabilisticModel(PredictionModel):
     def __init__(self, config: PredictionModelConfig) -> None:
         super().__init__(config)
-        self._encoder = ProbabilisticMLP(PredictionModelConfig)._decoder
+        self._encoder = ProbabilisticMLP(PredictionModelConfig)._encoder
         self._decoder = ProbabilisticMLP(PredictionModelConfig)._decoder
 
     @staticmethod
@@ -64,6 +64,5 @@ class ProbabilisticModel(PredictionModel):
         )
 
         # Translate so that latest timestep for each actor is the origin
-
         out_batches = unflatten_batch(transformed_out, batch_ids)
         return out_batches
