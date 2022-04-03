@@ -44,3 +44,7 @@ Making Your Self-driving Car Perceive the World.
    ```bash
    unzip pandaset_0.zip -d <your_path_to_dataset>
    ```
+
+6. To switch between the Gaussian and Regular Prediction model:
+      1. Open /prediction/main.py
+      2. In line 22, set MODEL=0 for regular, and MODEL=1 for Gaussian.
