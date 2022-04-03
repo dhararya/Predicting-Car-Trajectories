@@ -45,7 +45,7 @@ def visualize_trajectories(
                 start_color[0] * (1 - ratio) + end_color[0] * ratio,
                 start_color[1] * (1 - ratio) + end_color[1] * ratio,
                 start_color[2] * (1 - ratio) + end_color[2] * ratio,
-                0.3,
+                0.2,
             )
 
             if gaussian:
