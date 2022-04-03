@@ -110,7 +110,6 @@ class ProbabalisticPredictionLossFunction(PredictionLossFunction):
 
     def __init__(self, config: PredictionLossConfig) -> None:
         super(PredictionLossFunction, self).__init__()
-        self._loss_weight = config.l1_loss_weight
 
     def forward(
         self, predictions: List[Tensor], targets: List[Tensor]
@@ -139,7 +138,7 @@ class ProbabalisticPredictionLossFunction(PredictionLossFunction):
         nll_loss = compute_NLL_loss(target_centroids, predicted_centroids)
 
         # 4. Aggregate losses using the configured weights.
-        total_loss = nll_loss * self._loss_weight
+        total_loss = nll_loss 
 
         loss_metadata = PredictionLossMetadata(total_loss, nll_loss)
         return total_loss, loss_metadata

@@ -97,8 +97,8 @@ def overfit(
                 a = predictions.centroids[:, :, 2]
                 b = predictions.centroids[:, :, 3] #b=c as matrices must be symmetric
                 c= predictions.centroids[:, :, 5]
-                major = torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b))
-                minor = torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b))
+                major = torch.sqrt(torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
+                minor = torch.sqrt(torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
                 boxes = torch.stack((major, minor), dim=2)
                 predictions.boxes = boxes
                 predictions.centroids = predictions.centroids[:, :, 0:2]
