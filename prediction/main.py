@@ -19,7 +19,7 @@ from prediction.utils.viz import vis_pred_labels
 torch.multiprocessing.set_sharing_strategy("file_system")
 
 #set to 0 for regular model, 1 for Gaussian
-MODEL = 1
+MODEL = 0
 
 
 def overfit(
@@ -244,10 +244,10 @@ def train(
                     a = predictions.centroids[:, :, 2]
                     b = predictions.centroids[:, :, 3] #b=c as matrices must be symmetric
                     c= predictions.centroids[:, :, 5]
-                    major = torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b))
-                    minor = torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b))
+                    major = torch.sqrt(torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
+                    minor = torch.sqrt(torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
                     boxes = torch.stack((major, minor), dim=2)
-                    predictions.boxes = boxes/3
+                    predictions.boxes = boxes
                     predictions.centroids = predictions.centroids[:, :, 0:2]
                 else:
                     predictions.boxes = labels[0].boxes
@@ -263,6 +263,8 @@ def train(
         for _, (history_tensors, _, labels) in tqdm(enumerate(test_dataloader)):
             model.eval()
             predictions = model.inference(history_tensors[0].to(device))
+            if bool(MODEL):
+                predictions.centroids = predictions.centroids[:, :, 0:2]
             evaluator.append(predictions.to(torch.device("cpu")), labels[0])
 
         result = evaluator.evaluate()
