@@ -321,7 +321,7 @@ def test(
 
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config)
+    model = PredictionModel(model_config).to(device) if MODEL == 0 else ProbabilisticModel(model_config).to(device)
     if checkpoint_path is not None:
         model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
     model = model.to(device)
@@ -338,6 +338,8 @@ def test(
             history_tensor.to(device) for history_tensor in history_tensors
         ]
         predictions = model.inference(history_tensors[0].to(device)).to("cpu")
+        if bool(MODEL):
+            predictions.centroids = predictions.centroids[:, :, 0:2]
         # We copy over the ground truth yaw and boxes for simplicity
         predictions.yaws = labels[0].yaws
         predictions.boxes = labels[0].boxes
@@ -373,7 +375,7 @@ def evaluate(
     os.makedirs(output_root, exist_ok=True)
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config)
+    model = PredictionModel(model_config).to(device) if MODEL == 0 else ProbabilisticModel(model_config).to(device)
     if checkpoint_path is not None:
         model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
     model = model.to(device)
@@ -387,6 +389,8 @@ def evaluate(
     for _, (history_tensors, _, labels) in tqdm(enumerate(dataloader)):
         model.eval()
         predictions = model.inference(history_tensors[0].to(device))
+        if bool(MODEL):
+            predictions.centroids = predictions.centroids[:, :, 0:2]
         evaluator.append(predictions.to(torch.device("cpu")), labels[0])
 
     result = evaluator.evaluate()
