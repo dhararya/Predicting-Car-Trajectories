@@ -17,17 +17,17 @@ class ProbabilisticMLP(nn.Module):
         self._encoder = nn.Sequential(
             nn.Flatten(),
             nn.Linear(30, 128),
-            nn.ReLU(),
+            nn.ELU(),
             nn.Linear(128, 256),
-            nn.ReLU(),
+            nn.ELU(),
         )
 
         self._decoder = nn.Sequential(
                 nn.Flatten(),
                 nn.Linear(256, 128),
-                nn.ReLU(),
+                nn.ELU(),
                 nn.Linear(128, 50),
-                nn.ReLU(),
+                nn.ELU(),
             )
 
 
