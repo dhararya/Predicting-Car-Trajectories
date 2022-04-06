@@ -117,7 +117,7 @@ def train(
     num_workers: int = 8,
     num_epochs: int = 25,
     log_frequency: int = int(269 // 16),
-    learning_rate: float = 1e-4,
+    learning_rate: float = 3e-4,
     checkpoint_path: Optional[str] = None,
 ) -> None:
     """Train detector on the Pandaset dataset.
@@ -371,7 +371,6 @@ def evaluate(
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     os.makedirs(output_root, exist_ok=True)
-
     # setup model
     model_config = PredictionModelConfig()
     model = PredictionModel(model_config)
@@ -384,7 +383,6 @@ def evaluate(
     dataloader = torch.utils.data.DataLoader(
         dataset, num_workers=num_workers, collate_fn=custom_collate
     )
-
     evaluator = Evaluator()
     for _, (history_tensors, _, labels) in tqdm(enumerate(dataloader)):
         model.eval()

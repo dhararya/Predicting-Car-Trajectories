@@ -32,17 +32,17 @@ class PredictionModel(nn.Module):
         self._encoder = nn.Sequential(
             nn.Flatten(),
             nn.Linear(30, 64),
-            nn.ReLU(),
+            nn.ELU(),
             nn.Linear(64, 128),
-            nn.ReLU(),
+            nn.ELU(),
         )
 
         self._decoder = nn.Sequential(
             nn.Flatten(),
             nn.Linear(128, 32),
-            nn.ReLU(),
+            nn.ELU(),
             nn.Linear(32, 20),
-            nn.ReLU(),
+            nn.ELU(),
         )
 
     @staticmethod
