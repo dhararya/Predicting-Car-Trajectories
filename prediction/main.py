@@ -12,10 +12,14 @@ from tqdm import tqdm
 from prediction.dataset import PandasetPredDataset, custom_collate
 from prediction.metrics.evaluator import Evaluator
 from prediction.model import PredictionModel, PredictionModelConfig
-from prediction.modules.loss_function import PredictionLossFunction
+from prediction.modules.probabilistic_model import ProbabilisticModel
+from prediction.modules.loss_function import PredictionLossFunction, ProbabalisticPredictionLossFunction
 from prediction.utils.viz import vis_pred_labels
 
 torch.multiprocessing.set_sharing_strategy("file_system")
+
+#set to 0 for regular model, 1 for Gaussian
+MODEL = 1
 
 
 def overfit(
@@ -47,14 +51,14 @@ def overfit(
 
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config).to(device)
+    model = PredictionModel(model_config).to(device) if MODEL == 0 else ProbabilisticModel(model_config).to(device)
 
     # setup data
     dataset = PandasetPredDataset(data_root, test=False)
     dataloader = torch.utils.data.DataLoader(dataset, collate_fn=custom_collate)
 
     # setup loss function and optimizer
-    loss_fn = PredictionLossFunction(model_config.loss)
+    loss_fn = PredictionLossFunction(model_config.loss) if MODEL==0 else ProbabalisticPredictionLossFunction(model_config.loss)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     losses_buffer = defaultdict(lambda: [])
     # start training
@@ -89,8 +93,18 @@ def overfit(
                 predictions = model.inference(history_tensors[0].to(device)).to("cpu")
             # We copy over the ground truth yaw and boxes for simplicity
             predictions.yaws = labels[0].yaws
-            predictions.boxes = labels[0].boxes
-            vis_pred_labels(predictions, labels[0])
+            if bool(MODEL):
+                a = predictions.centroids[:, :, 2]
+                b = predictions.centroids[:, :, 3] #b=c as matrices must be symmetric
+                c= predictions.centroids[:, :, 5]
+                major = torch.sqrt(torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
+                minor = torch.sqrt(torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
+                boxes = torch.stack((major, minor), dim=2)
+                predictions.boxes = boxes
+                predictions.centroids = predictions.centroids[:, :, 0:2]
+            else:
+                predictions.boxes = labels[0].boxes
+            vis_pred_labels(predictions, labels[0], bool(MODEL))
             plt.savefig(f"{output_root}/predictions.png")
             plt.close("all")
 
@@ -130,7 +144,7 @@ def train(
 
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config)
+    model = PredictionModel(model_config).to(device) if MODEL == 0 else ProbabilisticModel(model_config).to(device)
     if checkpoint_path is not None:
         model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
     model = model.to(device)
@@ -152,7 +166,7 @@ def train(
     )
 
     # setup loss function and optimizer
-    loss_fn = PredictionLossFunction(model_config.loss)
+    loss_fn = PredictionLossFunction(model_config.loss) if MODEL==0 else ProbabalisticPredictionLossFunction(model_config.loss)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate * batch_size)
     # Learning rate decay coefficient
     # Set to < 1 if you want to decay the learning rate each epoch
@@ -226,8 +240,18 @@ def train(
                     )
                 # We copy over the ground truth yaw and boxes for simplicity
                 predictions.yaws = labels[0].yaws
-                predictions.boxes = labels[0].boxes
-                vis_pred_labels(predictions, labels[0])
+                if bool(MODEL):
+                    a = predictions.centroids[:, :, 2]
+                    b = predictions.centroids[:, :, 3] #b=c as matrices must be symmetric
+                    c= predictions.centroids[:, :, 5]
+                    major = torch.sqrt(torch.squeeze((a+c)/2 + torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
+                    minor = torch.sqrt(torch.squeeze((a+c)/2 - torch.sqrt(((a-c)/2)*((a-c)/2)+b*b)))
+                    boxes = torch.stack((major, minor), dim=2)
+                    predictions.boxes = boxes
+                    predictions.centroids = predictions.centroids[:, :, 0:2]
+                else:
+                    predictions.boxes = labels[0].boxes
+                vis_pred_labels(predictions, labels[0], bool(MODEL))
                 plt.savefig(f"{output_root}/predictions.png")
                 plt.close("all")
 
@@ -239,6 +263,8 @@ def train(
         for _, (history_tensors, _, labels) in tqdm(enumerate(test_dataloader)):
             model.eval()
             predictions = model.inference(history_tensors[0].to(device))
+            if bool(MODEL):
+                predictions.centroids = predictions.centroids[:, :, 0:2]
             evaluator.append(predictions.to(torch.device("cpu")), labels[0])
 
         result = evaluator.evaluate()
@@ -295,7 +321,7 @@ def test(
 
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config)
+    model = PredictionModel(model_config).to(device) if MODEL == 0 else ProbabilisticModel(model_config).to(device)
     if checkpoint_path is not None:
         model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
     model = model.to(device)
@@ -312,6 +338,8 @@ def test(
             history_tensor.to(device) for history_tensor in history_tensors
         ]
         predictions = model.inference(history_tensors[0].to(device)).to("cpu")
+        if bool(MODEL):
+            predictions.centroids = predictions.centroids[:, :, 0:2]
         # We copy over the ground truth yaw and boxes for simplicity
         predictions.yaws = labels[0].yaws
         predictions.boxes = labels[0].boxes
@@ -345,10 +373,9 @@ def evaluate(
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     os.makedirs(output_root, exist_ok=True)
-
     # setup model
     model_config = PredictionModelConfig()
-    model = PredictionModel(model_config)
+    model = PredictionModel(model_config).to(device) if MODEL == 0 else ProbabilisticModel(model_config).to(device)
     if checkpoint_path is not None:
         model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
     model = model.to(device)
@@ -358,11 +385,12 @@ def evaluate(
     dataloader = torch.utils.data.DataLoader(
         dataset, num_workers=num_workers, collate_fn=custom_collate
     )
-
     evaluator = Evaluator()
     for _, (history_tensors, _, labels) in tqdm(enumerate(dataloader)):
         model.eval()
         predictions = model.inference(history_tensors[0].to(device))
+        if bool(MODEL):
+            predictions.centroids = predictions.centroids[:, :, 0:2]
         evaluator.append(predictions.to(torch.device("cpu")), labels[0])
 
     result = evaluator.evaluate()

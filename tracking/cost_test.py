@@ -29,6 +29,6 @@ def test_iou_2d() -> None:
     )
     iou_mat = iou_2d(bboxes_a, bboxes_b)
     exp_iou_mat = (1 - 2 * (1 - 0.5 * np.sqrt(2)) ** 2) / (
-        1 + 2 * (1 - 0.5 * np.sqrt(2)) ** 2
+            1 + 2 * (1 - 0.5 * np.sqrt(2)) ** 2
     )
     np.testing.assert_allclose(iou_mat, exp_iou_mat)
