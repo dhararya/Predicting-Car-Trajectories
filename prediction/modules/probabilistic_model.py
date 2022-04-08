@@ -16,18 +16,18 @@ class ProbabilisticMLP(nn.Module):
         super().__init__()
         self._encoder = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(30, 128),
-            nn.ELU(),
-            nn.Linear(128, 256),
-            nn.ELU(),
+            nn.Linear(30, 64),
+            nn.ReLU(),
+            nn.Linear(64, 128),
+            nn.ReLU(),
         )
 
         self._decoder = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(256, 128),
-                nn.ELU(),
-                nn.Linear(128, 50),
-                nn.ELU(),
+                nn.Linear(128, 64),
+                nn.ReLU(),
+                nn.Linear(64, 50),
+                nn.ReLU(),
             )
 
 

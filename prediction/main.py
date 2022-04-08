@@ -19,7 +19,7 @@ from prediction.utils.viz import vis_pred_labels
 torch.multiprocessing.set_sharing_strategy("file_system")
 
 #set to 0 for regular model, 1 for Gaussian
-MODEL = 0
+MODEL = 1
 
 
 def overfit(
@@ -117,7 +117,7 @@ def train(
     num_workers: int = 8,
     num_epochs: int = 25,
     log_frequency: int = int(269 // 16),
-    learning_rate: float = 3e-4,
+    learning_rate: float = 1e-4,
     checkpoint_path: Optional[str] = None,
 ) -> None:
     """Train detector on the Pandaset dataset.
