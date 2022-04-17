@@ -1,0 +1,1 @@
+python -m tracking.main track --dataset path=/u/csc490h/dataset --tracker associate method=hungarians --results_path=~/Desktop/module-2/tracker-2
