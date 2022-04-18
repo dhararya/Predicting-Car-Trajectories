@@ -56,8 +56,8 @@ class Tracker:
             cost_matrix: cost matrix of shape [M, N]
         """
         # TODO: Replace this stub code by making use of iou_2d
-        result = iou_2d(bboxes1.numpy(), bboxes2.numpy())
-        return 1 - torch.tensor(result)
+        cost_matrix = iou_2d(bboxes1.numpy(), bboxes2.numpy())
+        return torch.Tensor(1-cost_matrix)
 
     def associate_greedy(
         self, bboxes1: Tensor, bboxes2: Tensor
@@ -72,12 +72,11 @@ class Tracker:
             and j-th box in bboxes2 are associated.
             cost_matrix: cost matrix of shape [M, N]
         """
-        # TODO: Replace this stub code by invoking self.cost_matrix and greedy_matching
         M, N = bboxes1.shape[0], bboxes2.shape[0]
         cost_matrix = self.cost_matrix(bboxes1, bboxes2)
         assign_matrix = torch.zeros((M, N))
-        rows,cols = greedy_matching(cost_matrix.numpy())
-        assign_matrix[rows, cols]  = 1
+        row_ids, col_ids = greedy_matching(cost_matrix.numpy())
+        assign_matrix[row_ids, col_ids] = 1
         return assign_matrix, cost_matrix
 
     def associate_hungarian(
@@ -95,9 +94,10 @@ class Tracker:
         """
         # TODO: Replace this stub code by invoking self.cost_matrix and hungarian_matching
         M, N = bboxes1.shape[0], bboxes2.shape[0]
-        cost_matrix = torch.ones((M, N))
+        cost_matrix = self.cost_matrix(bboxes1, bboxes2)
         assign_matrix = torch.zeros((M, N))
-
+        row_ids, col_ids = hungarian_matching(cost_matrix.numpy())
+        assign_matrix[row_ids, col_ids] = 1
         return assign_matrix, cost_matrix
 
     def track_consecutive_frame(
@@ -125,8 +125,8 @@ class Tracker:
             raise ValueError(f"Unknown association method {self.associate_method}")
 
         # TODO: Filter out matches with costs >= self.match_th
-        notInFrame = assign_matrix >= self.match_th
-        assign_matrix[notInFrame] = 0
+        mask = cost_matrix >= self.match_th
+        assign_matrix[mask] = 0
         return assign_matrix, cost_matrix
 
     def track(self, bboxes_seq: List[Tensor], scores_seq: List[Tensor]):
