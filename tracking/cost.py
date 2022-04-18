@@ -30,7 +30,8 @@ def _get_rotated_coordinates(boxes: np.ndarray) -> np.ndarray:
 
     return np.stack([coord_1, coord_2, coord_3, coord_4], axis=1)
 
-def iou_2d(bboxes1: np.ndarray, bboxes2: np.ndarray) -> np.ndarray:
+# change opt_cost to 1 to use the sophisticated loss function 
+def iou_2d(bboxes1: np.ndarray, bboxes2: np.ndarray, opt_cost=0) -> np.ndarray:
     """Computes 2D intersection over union of two sets of bounding boxes
 
     Args:
@@ -56,11 +57,14 @@ def iou_2d(bboxes1: np.ndarray, bboxes2: np.ndarray) -> np.ndarray:
             iou = m_polygon.intersection(n_polygon).area / m_polygon.union(n_polygon).area
             dis = distance(m_polygon,n_polygon)
             v = (4 / (math.pi ** 2)) * math.pow((np.arctan(h2 / w2) - np.arctan(h1 / w1)), 2)
-            if(iou >= 0.5):
-                alpha = (v/((1-iou)+v))
-                iou_mat[m][n]= iou + dis + (alpha * v)
+            if opt_cost == 0:
+                iou_mat[m][n] = iou
             else:
-                iou_mat[m][n] = iou + dis
+                if(iou >= 0.5):
+                    alpha = (v/((1-iou)+v))
+                    iou_mat[m][n]= iou + dis + (alpha * v)
+                else:
+                    iou_mat[m][n] = iou + dis
     return iou_mat
 
 def distance(box1: Polygon, box2: Polygon):
