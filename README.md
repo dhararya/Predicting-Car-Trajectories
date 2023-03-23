@@ -1,6 +1,6 @@
 # CSC490H1: Making Your Self-driving Car Perceive the World
 
-This repository contains the starter code for CSC490H1:
+This repository contains the starter code for CSC490H1: We then filled functions required to detect cars from LIDAR Data, predict its trajectory five seconds into the future, and collect appropriate metrics and visualizations.
 Making Your Self-driving Car Perceive the World.
 
 ## Getting started
